@@ -1,8 +1,12 @@
 <!--index.wxml-->
 <view class="container">
-  <view class="naviButton" id="navi" bindtouchstart="naviToNavi">出行路线规划</view>
-  <view class="naviButton" id="navi" bindtouchstart="naviToNavi">出行路线规划</view>
-  <view class="naviButton" id="navi" bindtouchstart="naviToNavi">出行路线规划</view>
-  <view class="naviButton" id="navi" bindtouchstart="naviToNavi">出行路线规划</view>
-  <view class="naviButton" id="navi" bindtouchstart="naviToNavi">出行路线规划</view>
+  <view
+    wx:for="{{paths}}" 
+    wx:key="index"
+    class="naviButton"
+    bindtouchstart="naviToNavi"
+    data-points="{{item.points}}"
+  >
+    {{item.name}}
+  </view>
 </view>

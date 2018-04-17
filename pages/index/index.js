@@ -1,7 +1,27 @@
 Page({
-  naviToNavi: function(){
-    wx.navigateTo({
-      url: '../amap/amap'
-    })
+  data: {
+    paths: [{
+      name: '上海-福州-大田',
+      points:[
+        [31.249453, 121.455543], // 上海火车站
+        [26.113949, 119.32020], // 福州火车站
+        [25.69261, 117.84713], // 大田
+      ]
+    }, {
+      name: '昆明-大理-丽江',
+      points:[
+        [25.0981450000,102.9299120000], // 昆明长水国际机场
+        [25.0159890000,102.7217160000], // 昆明火车站
+        [25.5891900000,100.2497500000], // 大理火车站
+        [26.8108200000,100.2524200000], // 丽江火车站
+        [26.6666600000,100.2481100000] // 丽江机场
+      ]
+    }]
+  },
+  naviToNavi: function(event){
+    const { points } = event.currentTarget.dataset
+      wx.navigateTo({
+        url: `../amap/amap?points=${JSON.stringify(points)}`
+      })
   }
 })

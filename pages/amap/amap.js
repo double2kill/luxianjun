@@ -4,32 +4,38 @@ const myAmapFun = new amapFile.AMapWX({key: KEY});
 
 Page({
   data: {
-    markers: [{
-      iconPath: "../../img/mapicon_navi_s.png",
-      id: 0,
-      latitude: 31.249453,
-      longitude: 121.455543,
-      width: 23,
-      height: 33
-    }, {
-      iconPath: "../../img/mapicon_navi_e.png",
-      id: 0,
-      latitude: 26.113949,
-      longitude: 119.32020,
-      width: 24,
-      height: 34
-    }, {
-      iconPath: "../../img/mapicon_navi_e.png",
-      id: 0,
-      latitude: 25.69261,
-      longitude: 117.84713,
-      width: 24,
-      height: 34
-    }],
+    markers: [],
     distance: '',
     cost: '',
     polyline: []
   },
+  onLoad: function() {
+    // 解析路由跳转传过来的参数
+    let { points = "[]" } = this.options
+    const { markers, positions } = this.parseOptions(points)
+    this.setData({ markers })
+    var that = this;
+    let polyline_points = [];
+    const GETAllPath = positions.map(position => {
+      return this.GETAmapPath(position)
+    })
+    Promise.all(GETAllPath)
+      .then(result => {
+        return result.reduce((allPoints = [], points) => {
+          return allPoints.concat(points)
+        })
+      })
+      .then(allPoints => {
+        this.setData({
+          polyline: [{
+            points: allPoints,
+            color: "#0091ff",
+            width: 6
+          }]
+        });
+      })
+  },
+ 
   GETAmapPath([origin, destination]) {
     return new Promise((resolve, reject) => {
       myAmapFun.getDrivingRoute({
@@ -52,51 +58,36 @@ Page({
           resolve(points)
         },
         fail: function (data) {
-          debugger
         }
       })
     })
   },
-  onLoad: function() {
-    var that = this;
-    var polyline_points = [];
-    var positions = [
-      // ['116.481028,39.989643', '116.434446,39.90816'],
-      [
-        `${this.data.markers[0].longitude}, ${this.data.markers[0].latitude}`,
-        `${this.data.markers[1].longitude}, ${this.data.markers[1].latitude}`
-      ],
-      [
-        `${this.data.markers[1].longitude}, ${this.data.markers[1].latitude}`,
-        `${this.data.markers[2].longitude}, ${this.data.markers[2].latitude}`
-      ]
-    ]
-    const GETAllPath = positions.map(position => {
-      return this.GETAmapPath(position)
+  parseOptions(points) {
+    points = JSON.parse(points)
+    const markers = points.map((point, index) => {
+      const imgName = index === 0
+        ? 'mapicon_navi_s'
+        : (index !== points.length - 1) 
+          ? 'marker'
+          : 'mapicon_navi_e'
+      const iconPath = `../../img/${imgName}.png`
+      return { 
+        id: index,
+        iconPath,
+        latitude: point[0],
+        longitude: point[1],
+        width: 23,
+        height: 33
+      }
     })
-    Promise.all(GETAllPath)
-      .then(result => {
-        return result.reduce((allPoints = [], points) => {
-          return allPoints.concat(points)
-        })
-      })
-      .then(allPoints => {
-        this.setData({
-          polyline: [{
-            points: allPoints,
-            color: "#0091ff",
-            width: 6
-          }]
-        });
-      })
-
-    // this.setData({
-    //   polyline: [{
-    //     points: points,
-    //     color: "#0091ff",
-    //     width: 6
-    //   }]
-    // });
+    const positions = []
+    for(let i = 0; i < points.length - 1; i++) {
+      positions.push([
+        `${points[i][1]},${points[i][0]}`,
+        `${points[i + 1][1]},${points[i + 1][0]}`,
+      ])
+    }
+    return { markers, positions }
   },
   goDetail: function(){
     wx.navigateTo({
