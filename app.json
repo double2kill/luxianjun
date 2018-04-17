@@ -1,0 +1,13 @@
+{
+  "pages":[
+    "pages/index/index",
+    "pages/logs/logs",
+    "pages/amap/amap"
+  ],
+  "window":{
+    "backgroundTextStyle":"light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "路线君",
+    "navigationBarTextStyle":"black"
+  }
+}
