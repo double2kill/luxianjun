@@ -1,19 +1,27 @@
 import amapFile from '../../libs/amap-wx.js'
 import { KEY } from '../../libs/config.js'
 const myAmapFun = new amapFile.AMapWX({key: KEY});
+const app = getApp()
+const {
+  PATHS
+} = app.globalData
 
 Page({
   data: {
     markers: [],
     distance: '',
     cost: '',
-    polyline: []
+    polyline: [],
+    steps_info: [],
+    steps_info_points: [],
+    currentItem: 0
   },
   onLoad: function() {
     // 解析路由跳转传过来的参数
-    let { points = "[]" } = this.options
-    const { markers, positions } = this.parseOptions(points)
-    this.setData({ markers })
+    const { pathId } = this.options
+    const path = PATHS.find(item => +item.id === +pathId)
+    const { markers, positions, steps_info } = this.parseOptions(path)
+    this.setData({ steps_info,  markers })
     var that = this;
     let polyline_points = [];
     const GETAllPath = positions.map(position => {
@@ -21,12 +29,16 @@ Page({
     })
     Promise.all(GETAllPath)
       .then(result => {
-        return result.reduce((allPoints = [], points) => {
+        return [
+          result.reduce((allPoints = [], points) => {
           return allPoints.concat(points)
-        })
+        }),
+        result
+        ]
       })
-      .then(allPoints => {
+      .then(([allPoints, result]) => {
         this.setData({
+          steps_info_points: result,
           polyline: [{
             points: allPoints,
             color: "#0091ff",
@@ -62,32 +74,48 @@ Page({
       })
     })
   },
-  parseOptions(points) {
-    points = JSON.parse(points)
-    const markers = points.map((point, index) => {
+  parseOptions(path) {
+    const markers = path.points.map((point, index) => {
       const imgName = index === 0
         ? 'mapicon_navi_s'
-        : (index !== points.length - 1) 
+        : (index !== path.points.length - 1) 
           ? 'marker'
           : 'mapicon_navi_e'
       const iconPath = `../../img/${imgName}.png`
       return { 
         id: index,
         iconPath,
-        latitude: point[0],
-        longitude: point[1],
+        latitude: point.position[0],
+        longitude: point.position[1],
         width: 23,
         height: 33
       }
     })
     const positions = []
-    for(let i = 0; i < points.length - 1; i++) {
+    for (let i = 0; i < path.points.length - 1; i++) {
       positions.push([
-        `${points[i][1]},${points[i][0]}`,
-        `${points[i + 1][1]},${points[i + 1][0]}`,
+        `${path.points[i].position[1]},${path.points[i].position[0]}`,
+        `${path.points[i + 1].position[1]},${path.points[i + 1].position[0]}`,
       ])
     }
-    return { markers, positions }
+    const steps_info = []
+    for (let i = 0; i < path.points.length - 1; i++) {
+      steps_info.push({
+        from: path.points[i].name,
+        to: path.points[i + 1].name
+      })
+    }
+    return { markers, positions, steps_info }
+  },
+  tagChoose: function (event) {
+    const a = myAmapFun
+    debugger
+    console.log(22222222)
+    var id = event.currentTarget.dataset.id;
+    //设置当前样式
+    this.setData({
+      'currentItem': id
+    })
   },
   goDetail: function(){
     wx.navigateTo({

@@ -5,7 +5,7 @@
     wx:key="index"
     class="naviButton"
     bindtouchstart="naviToNavi"
-    data-points="{{item.points}}"
+    data-path_id="{{item.id}}"
   >
     {{item.name}}
   </view>

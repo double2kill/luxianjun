@@ -1,1 +1,1 @@
-export const KEY = 'your key'
+export const KEY = '2c41643b45cce7814226b5bb434eb338'
