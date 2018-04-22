@@ -1,5 +1,12 @@
 <view class="map_box">
-  <map id="navi_map" longitude="{{markers[0].longitude}}" latitude="{{markers[0].latitude}}" scale="12" markers="{{markers}}" polyline="{{polyline}}"></map>
+  <map
+    id="navi_map"
+    longitude="{{center.longitude}}"
+    latitude="{{center.latitude}}"
+    scale="{{scale}}"
+    markers="{{markers}}"
+    polyline="{{polyline}}">
+  </map>
   <view class='steps_bar'>
     <span 
       wx:for="{{steps_info}}"
